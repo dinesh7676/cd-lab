@@ -1,65 +1,105 @@
-#include &lt;stdio.h&gt;
-#include &lt;string.h&gt;
-int main() {
-printf(&quot;Grammar:\nS -&gt; a\n\n&quot;);
-char input[] = &quot;a&quot;;
-char input_buf[10];
-sprintf(input_buf, &quot;%s$&quot;, input);
-char stack[20] = &quot;$&quot;;
-int s_top = 0;
-int state_stack[20] = {0};
-int st_top = 0;
-int ip = 0;
-printf(&quot;Stack\t\tInput\t\tAction\n&quot;);
-printf(&quot;-----------------------------------------\n&quot;);
-while (1) {
-int current_state = state_stack[st_top];
-char tok = input_buf[ip];
 
-if (current_state == 0) {
-if (tok == &#39;a&#39;) {
-s_top++;
-stack[s_top] = &#39;a&#39;;
-stack[s_top + 1] = &#39;\0&#39;;
-printf(&quot;%s\t\t%s\t\tShift a\n&quot;, stack, input_buf + ip);
-st_top++;
-state_stack[st_top] = 2;
-ip++;
-} else {
-printf(&quot;\nFailure: String Rejected.\n&quot;);
-return 1;
-}
-}
-else if (current_state == 2) {
-if (tok == &#39;$&#39;) {
+#include <stdio.h>
+#include <string.h>
 
-stack[s_top] = &#39;\0&#39;;
-s_top--;
-st_top--;
-printf(&quot;%s\t\t%s\t\tReduce S -&gt; a\n&quot;, stack, input_buf + ip);
+int main()
+{
+    printf("Grammar:\nS -> a\n\n");
 
-s_top++;
-stack[s_top] = &#39;S&#39;;
-stack[s_top + 1] = &#39;\0&#39;;
-if (state_stack[st_top] == 0) {
-st_top++;
-state_stack[st_top] = 1;
+    char input[] = "a";
+    char input_buf[10];
+
+    sprintf(input_buf, "%s$", input);
+
+    char stack[20] = "$";
+    int s_top = 0;
+
+    int state_stack[20] = {0};
+    int st_top = 0;
+
+    int ip = 0;
+
+    printf("Stack\t\tInput\t\tAction\n");
+    printf("-----------------------------------------\n");
+
+    while (1)
+    {
+        int current_state = state_stack[st_top];
+        char tok = input_buf[ip];
+
+        /* State 0: Shift a */
+        if (current_state == 0)
+        {
+            if (tok == 'a')
+            {
+                s_top++;
+                stack[s_top] = 'a';
+                stack[s_top + 1] = '\0';
+
+                printf("%s\t\t%s\t\tShift a\n",
+                       stack, input_buf + ip);
+
+                st_top++;
+                state_stack[st_top] = 2;
+
+                ip++;
+            }
+            else
+            {
+                printf("\nFailure: String Rejected.\n");
+                return 1;
+            }
+        }
+
+        /* State 2: Reduce S -> a */
+        else if (current_state == 2)
+        {
+            if (tok == '$')
+            {
+                stack[s_top] = '\0';
+                s_top--;
+
+                st_top--;
+
+                printf("%s\t\t%s\t\tReduce S -> a\n",
+                       stack, input_buf + ip);
+
+                s_top++;
+                stack[s_top] = 'S';
+                stack[s_top + 1] = '\0';
+
+                if (state_stack[st_top] == 0)
+                {
+                    st_top++;
+                    state_stack[st_top] = 1;
+                }
+            }
+            else
+            {
+                printf("\nFailure: String Rejected.\n");
+                return 1;
+            }
+        }
+
+        /* State 1: Accept */
+        else if (current_state == 1)
+        {
+            if (tok == '$')
+            {
+                printf("%s\t\t%s\t\tAccept\n",
+                       stack, input_buf + ip);
+
+                printf("\nSuccess: String is Parsed / Accepted!\n");
+                break;
+            }
+            else
+            {
+                printf("\nFailure: String Rejected.\n");
+                return 1;
+            }
+        }
+    }
+
+    return 0;
 }
-} else {
-printf(&quot;\nFailure: String Rejected.\n&quot;);
-return 1;
-}
-}
-else if (current_state == 1) {
-if (tok == &#39;$&#39;) {
-printf(&quot;%s\t\t%s\t\tAccept\n&quot;, stack, input_buf + ip);
-printf(&quot;\nSuccess: String is Parsed / Accepted!\n&quot;);
-break;
-} else {
-printf(&quot;\nFailure: String Rejected.\n&quot;);
-return 1;
-}
-}
-}
-return 0;
-}
+
